@@ -15,31 +15,35 @@ async function init() {
   const camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
-    10,
-    3000
+    1,
+    10000
   );
 
-  camera.position.z = 1000;
+  camera.position.z = 2000;
+  camera.position.x = 500;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   // renderer.setClearColor(0xffffff);
 
   /* エラー時にシェーダの全体のコードを表示(three.js 0.152.0 対応) */
-  renderer.debug.onShaderError = ( gl, program, vertexShader, fragmentShader ) => {
-  
-    const vertexShaderSource = gl.getShaderSource( vertexShader );
-    const fragmentShaderSource = gl.getShaderSource( fragmentShader );
-    
-    console.groupCollapsed( "vertexShader" )
-    console.log( vertexShaderSource )
-    console.groupEnd()
-    
-    console.groupCollapsed( "fragmentShader" )
-    console.log( fragmentShaderSource )
-    console.groupEnd()
+  renderer.debug.onShaderError = (
+    gl,
+    program,
+    vertexShader,
+    fragmentShader
+  ) => {
+    const vertexShaderSource = gl.getShaderSource(vertexShader);
+    const fragmentShaderSource = gl.getShaderSource(fragmentShader);
 
-  }
+    console.groupCollapsed("vertexShader");
+    console.log(vertexShaderSource);
+    console.groupEnd();
+
+    console.groupCollapsed("fragmentShader");
+    console.log(fragmentShaderSource);
+    console.groupEnd();
+  };
 
   document.body.appendChild(renderer.domElement);
 
@@ -52,16 +56,19 @@ async function init() {
   }
 
   function setupGeometry() {
-    const wSeg = 30,
-      hSeg = 30;
+    const wSeg = 50,
+      hSeg = 50;
     const sphere = new THREE.SphereGeometry(400, wSeg, hSeg);
-    const plane = new THREE.PlaneGeometry(600, 300, wSeg, hSeg);
+    const plane = new THREE.PlaneGeometry(2000, 2000, wSeg, hSeg);
+    plane.rotateX(Math.PI / 2);
+    plane.translate(0, -700, 0);
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', plane.getAttribute('position'));
-    geometry.setAttribute('uv', plane.getAttribute('uv'));
+    geometry.setAttribute("position", plane.getAttribute("position"));
+    geometry.setAttribute("uv", plane.getAttribute("uv"));
     // geometry.setAttribute('plane', plane.getAttribute('position'));
-    geometry.setAttribute('sphere', sphere.getAttribute('position'));
-    
+    geometry.setAttribute("sphere", sphere.getAttribute("position"));
+    geometry.setAttribute("normal", sphere.getAttribute("normal"));
+
     // 対角線上に詰められた遅延時間用の頂点データ
     const delayVertices = getDiagonalVertices(hSeg, wSeg, getValue, 0);
     //  printMat(delayVertices, wSeg + 1, '遅延時間行列');
@@ -119,6 +126,7 @@ async function init() {
     vertexShader,
     fragmentShader,
     side: THREE.DoubleSide,
+    transparent: true,
     //  wireframe: true,
   });
   // const material1 = new THREE.PointsMaterial({ color: 0xff0000 });
@@ -131,7 +139,10 @@ async function init() {
 
   // lil gui
   const gui = new GUI();
-  gui.add(material.uniforms.uProgress, "value", 0, 1, 0.1).name("progress").listen();
+  gui
+    .add(material.uniforms.uProgress, "value", 0, 1, 0.1)
+    .name("progress")
+    .listen();
   const datObj = { next: !!material.uniforms.uProgress.value };
   gui
     .add(datObj, "next")

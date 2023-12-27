@@ -37,7 +37,14 @@ async function init() {
   function setupGeometry() {
     const wSeg = 30,
       hSeg = 30;
-    const geometry = new THREE.SphereGeometry(200, wSeg, hSeg);
+    const sphere = new THREE.SphereGeometry(400, wSeg, hSeg);
+    const plane = new THREE.PlaneGeometry(600, 300, wSeg, hSeg);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", plane.getAttribute("position"));
+    geometry.setAttribute("uv", plane.getAttribute("uv"));
+    geometry.setAttribute("sphere", sphere.getAttribute("position"));
+
+    console.log(geometry);
 
     // 対角線上に詰められた遅延時間用の頂点データ
     const delayVertices = getDiagonalVertices(hSeg, wSeg, getValue, 0);
@@ -108,7 +115,10 @@ async function init() {
 
   // lil gui
   const gui = new GUI();
-  gui.add(material.uniforms.uProgress, "value", 0, 1, 0.1).name("progress").listen();
+  gui
+    .add(material.uniforms.uProgress, "value", 0, 1, 0.01)
+    .name("progress")
+    .listen();
   const datObj = { next: !!material.uniforms.uProgress.value };
   gui
     .add(datObj, "next")

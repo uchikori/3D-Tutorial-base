@@ -8,19 +8,20 @@ precision mediump float;
 varying vec2 vUv;
 varying float vDelay;
 attribute float aDelay;
+attribute vec3 sphere;
 
 uniform float uTick;
+uniform float uProgress;
 uniform float uScaleDelay;
 uniform float uScaleTime;
 
 void main() {
     vUv = uv;
     vDelay = aDelay;
-    vec3 pos = position;
+    float delay = easeBack(clamp(uProgress * 2.0 - (1.0 - uv.y), 0., 1.));
+    vec3 pos = mix(position, sphere, delay);
 
-    float delta = sin(uTick * uScaleTime - uv.y * uScaleDelay) * 0.5 + 0.5;
-    pos += 40. * normal * delta;
 
-    gl_PointSize = 10. * delta;
+    gl_PointSize = 5.;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }

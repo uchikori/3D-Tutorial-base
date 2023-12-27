@@ -20,10 +20,10 @@ void main() {
     vDelay = aDelay;
     float delay = easeBack(clamp(uProgress * 2. - (1. - uv.y ), 0., 1.));
     vec3 pos = mix(position, sphere, delay);
-    // float delta = sin(uTick * uScaleTime - uv.y * uScaleDelay) * 0.5 + 0.5;
-    // pos += 40. * normal * delta;
+
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
 
 
-    gl_PointSize = 10.;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = 7. * (1000.0 / -mvPosition.z);
+    gl_Position = projectionMatrix * mvPosition;
 }

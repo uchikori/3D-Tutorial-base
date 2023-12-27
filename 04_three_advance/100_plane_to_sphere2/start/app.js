@@ -40,11 +40,11 @@ async function init() {
     const sphere = new THREE.SphereGeometry(400, wSeg, hSeg);
     const plane = new THREE.PlaneGeometry(600, 300, wSeg, hSeg);
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', plane.getAttribute('position'));
-    geometry.setAttribute('uv', plane.getAttribute('uv'));
+    geometry.setAttribute("position", plane.getAttribute("position"));
+    geometry.setAttribute("uv", plane.getAttribute("uv"));
     // geometry.setAttribute('plane', plane.getAttribute('position'));
-    geometry.setAttribute('sphere', sphere.getAttribute('position'));
-    
+    geometry.setAttribute("sphere", sphere.getAttribute("position"));
+
     // 対角線上に詰められた遅延時間用の頂点データ
     const delayVertices = getDiagonalVertices(hSeg, wSeg, getValue, 0);
     //  printMat(delayVertices, wSeg + 1, '遅延時間行列');
@@ -94,8 +94,8 @@ async function init() {
       uProgress: { value: 0 },
       uSaturation: { value: 0.7 },
       uLightness: { value: 0.67 },
-      uColorDelay: { value: 3.3 },
-      uColorTime: { value: 0.05 },
+      uColorDelay: { value: 0.0 },
+      uColorTime: { value: 0.01 },
       uScaleDelay: { value: 4 },
       uScaleTime: { value: 0.04 },
     },
@@ -114,7 +114,10 @@ async function init() {
 
   // lil gui
   const gui = new GUI();
-  gui.add(material.uniforms.uProgress, "value", 0, 1, 0.1).name("progress").listen();
+  gui
+    .add(material.uniforms.uProgress, "value", 0, 1, 0.1)
+    .name("progress")
+    .listen();
   const datObj = { next: !!material.uniforms.uProgress.value };
   gui
     .add(datObj, "next")

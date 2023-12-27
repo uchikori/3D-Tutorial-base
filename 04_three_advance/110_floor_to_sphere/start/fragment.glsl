@@ -9,6 +9,7 @@ uniform float uSaturation;
 uniform float uLightness;
 uniform float uColorTime;
 uniform float uColorDelay;
+uniform float uProgress;
 
 #pragma glslify: hsl2rgb = require(glsl-hsl2rgb)
 
@@ -25,6 +26,16 @@ void main() {
   float hue = sin(uTick * uColorTime - vDelay * uColorDelay) * 0.5 + 0.5;
   vec3 rgb = hsl2rgb(hue, uSaturation, uLightness);
 
-  gl_FragColor = vec4(rgb, 1.);
+  //平面の時に円になるように透明度を設定
+  // float planeAlpha = length(vUv - vec2(0.5,0.5));
+  // float length = smoothstep(0.2, 0.5, planeAlpha);
+  // float circle = 1.0 - length;
+
+  float planeAlpha = 0.5 - length(vUv - vec2(0.5,0.5));
+  planeAlpha *= 2.0;
+  float sphereAlpha = 1.0;
+  float alpha = mix(planeAlpha, sphereAlpha, uProgress);
+
+  gl_FragColor = vec4(rgb, alpha);
   // gl_FragColor = tex;
 }
