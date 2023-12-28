@@ -1,9 +1,9 @@
 precision mediump float;
 
-#pragma glslify: easeBack = require(glsl-easings/back-in-out)
-#pragma glslify: easeCubic = require(glsl-easings/cubic-in-out)
+#pragma glslify: sineout = require(glsl-easings/quadratic-in-out)
+#pragma glslify: exponential = require(glsl-easings/exponential-in-out)
+#pragma glslify: snoise = require(glsl-noise/simplex/3d)
 
-#pragma glslify: rotate = require(glsl-rotate)
 
 varying vec2 vUv;
 varying float vDelay;
@@ -12,17 +12,27 @@ attribute float aDelay;
 attribute vec3 sphere;
 
 uniform float uProgress;
+uniform float uTick;
 uniform float uScaleDelay;
 uniform float uScaleTime;
 
 void main() {
     vUv = uv;
-    vDelay = aDelay;
+    vec3 pos = position;
 
-    float delay = easeBack(clamp(uProgress * 2. - (1. - uv.y ), 0., 1.));
-    vec3 pos = mix(position, sphere, delay);
+    float n = snoise(vec3(position.x, position.y, uTick * 0.01));
+    //n => 0~1
+    n = n * 0.5 + 0.5; 
+
+    float delay = exponential(clamp(uProgress * 2. - aDelay* 0.3, 0.0, 1.0));
+    vDelay = delay;
+    
+
+    pos.x += 800.0 * n * delay;
+    pos.y += 800.0 * n * delay;
+    pos.z += 200.0 * n * delay;
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = 7. * (1000. / -mvPosition.z);
+    gl_PointSize = 7. * (500. / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
 }

@@ -1,30 +1,25 @@
-precision mediump float;
+precision lowp float;
 
 varying vec2 vUv;
 varying float vDelay;
+varying float vProgress;
 
-uniform sampler2D uTex;
+uniform sampler2D uTexCurrent;
+uniform sampler2D uTexNext;
+uniform float uProgress;
 uniform float uTick;
-uniform float uSaturation;
-uniform float uLightness;
-uniform float uColorTime;
-uniform float uColorDelay;
-
-#pragma glslify: hsl2rgb = require(glsl-hsl2rgb)
 
 // gl_PointCoordについての説明
 // https://khronos.org/registry/OpenGL-Refpages/gl4/html/gl_PointCoord.xhtml
 
 void main() {
 
-  if(distance(gl_PointCoord, vec2(0.5, 0.5)) > 0.5) {
+  if(vProgress > 0.1 && distance(gl_PointCoord, vec2(0.5, 0.5)) > 0.5) {
     discard;
   }
-  vec4 tex = texture(uTex, gl_PointCoord);
+  vec4 texCurrent = texture(uTexCurrent, vUv);
+  vec4 texNext = texture(uTexNext, vUv);
+  vec4 tex = mix(texCurrent, texNext, uProgress);
 
-  float hue = sin(uTick * uColorTime - vDelay * uColorDelay) * 0.5 + 0.5;
-  vec3 rgb = hsl2rgb(hue, uSaturation, uLightness);
-
-  gl_FragColor = vec4(rgb, 1.);
-  // gl_FragColor = tex;
+  gl_FragColor = tex;
 }

@@ -37,19 +37,22 @@ async function init() {
   function setupGeometry() {
     const width = 600,
       height = 300,
-      wSeg = width/2,
-      hSeg = height/2;
+      wSeg = width / 2,
+      hSeg = height / 2;
 
     const plane = new THREE.PlaneGeometry(width, height, wSeg, hSeg);
-    
+
     // 対角線上に詰められた遅延時間用の頂点データ
-    const delayVertices = getDiagonalVertices(hSeg, wSeg, getValue, 0);
+    const intensityVertices = getDiagonalVertices(hSeg, wSeg, getIntensity, 0);
     //  printMat(delayVertices, wSeg + 1, '遅延時間行列');
 
+    function random(a, b) {
+      return a + (b - a) * Math.random();
+    }
+
     // 0~1までの値をstep毎に返す
-    function getValue(previousValue, currentIndex) {
-      let step = 1 / (hSeg + 1) / (wSeg + 1);
-      return previousValue + step;
+    function getIntensity() {
+      return random(0, 1500);
     }
 
     // 対角線上に頂点を詰めた配列を返す
@@ -72,11 +75,9 @@ async function init() {
       return arry;
     }
 
-    console.log(delayVertices);
-
     plane.setAttribute(
-      "aDelay",
-      new THREE.Float32BufferAttribute(delayVertices, 1)
+      "aIntensity",
+      new THREE.Float32BufferAttribute(intensityVertices, 1)
     );
 
     return plane;
@@ -94,7 +95,7 @@ async function init() {
     vertexShader,
     fragmentShader,
     side: THREE.DoubleSide,
-    transparent: true
+    transparent: true,
     //  wireframe: true,
   });
   // const material1 = new THREE.PointsMaterial({ color: 0xff0000 });
@@ -107,7 +108,10 @@ async function init() {
 
   // lil gui
   const gui = new GUI();
-  gui.add(material.uniforms.uProgress, "value", 0, 1, 0.1).name("progress").listen();
+  gui
+    .add(material.uniforms.uProgress, "value", 0, 1, 0.1)
+    .name("progress")
+    .listen();
   const datObj = { next: !!material.uniforms.uProgress.value };
   gui
     .add(datObj, "next")
@@ -115,8 +119,8 @@ async function init() {
     .onChange(function () {
       gsap.to(material.uniforms.uProgress, {
         value: +datObj.next,
-        duration: 2,
-        ease: "power2.out",
+        duration: 3,
+        ease: "none",
       });
     });
 
