@@ -19,7 +19,7 @@ async function init() {
     3000
   );
 
-  camera.position.z = 900;
+  camera.position.z = 500;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -35,9 +35,9 @@ async function init() {
   }
 
   function setupGeometry() {
-    const wSeg = 640,
-      hSeg = 819;
-    const plane = new THREE.PlaneGeometry(640, 819, wSeg, hSeg);
+    const wSeg = 960,
+      hSeg = 470;
+    const plane = new THREE.PlaneGeometry(960, 470, wSeg, hSeg);
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", plane.getAttribute("position"));
     geometry.setAttribute("uv", plane.getAttribute("uv"));
@@ -87,7 +87,7 @@ async function init() {
   window.geometry = geometry;
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      uTex: { value: await loadTex("/img/thanos2.png") },
+      uTex: { value: await loadTex("/img/thanos.png") },
       uTick: { value: 0 },
       uProgress: { value: 0 },
       uSaturation: { value: 0.7 },
@@ -124,8 +124,8 @@ async function init() {
     .onChange(function () {
       gsap.to(material.uniforms.uProgress, {
         value: +datObj.next,
-        duration: 10,
-        ease: "power2.out",
+        duration: 8,
+        ease: "none",
       });
     });
 
