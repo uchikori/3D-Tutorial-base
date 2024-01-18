@@ -6,6 +6,11 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass";
+import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
+import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass.js";
 
 // メインのレンダラーの設定
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -13,16 +18,26 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0xeeeeee);
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-
-// レンダーターゲット
-const renderTarget = new THREE.WebGLRenderTarget(500, 500);
-
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
+
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const pass = new GlitchPass();
+composer.addPass(pass);
+
+const pass2 = new DotScreenPass();
+composer.addPass(pass2);
+
+// レンダーターゲット
+const renderTarget = new THREE.WebGLRenderTarget(500, 500);
+
 const rtCamera = camera.clone();
 rtCamera.aspect = 1;
 rtCamera.updateProjectionMatrix();
@@ -73,7 +88,8 @@ function animate() {
   renderer.render(rtScene, rtCamera);
   renderer.setRenderTarget(null);
 
-  renderer.render(scene, camera);
+  composer.render();
+  // renderer.render(scene, camera);
 
   rtMesh.rotation.x += 0.01;
   rtMesh.rotation.y += 0.01;
