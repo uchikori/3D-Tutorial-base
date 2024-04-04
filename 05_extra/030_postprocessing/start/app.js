@@ -33,7 +33,10 @@ const pass = new GlitchPass();
 composer.addPass(pass);
 
 const pass2 = new DotScreenPass();
-composer.addPass(pass2);
+// composer.addPass(pass2);
+
+const filmPass = new FilmPass();
+composer.addPass(filmPass);
 
 // レンダーターゲット
 const renderTarget = new THREE.WebGLRenderTarget(500, 500);

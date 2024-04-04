@@ -16,9 +16,9 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeeeeee);
 
 /****************************************************************
- * Ⅱ.レンダラーターゲットの設定
+ * Ⅱ.レンダーターゲットの設定
  ****************************************************************/
-const renderTarget = new THREE.WebGLRenderTarget(500, 500);
+const renderTarget = new THREE.WebGLRenderTarget(300, 300);
 const rtScene = new THREE.Scene();
 rtScene.background = new THREE.Color(0x444444);
 

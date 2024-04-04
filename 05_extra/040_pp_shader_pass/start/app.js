@@ -8,9 +8,11 @@ import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
-import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass"
-import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass"
-
+import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass";
+import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass";
+import { ShaderPass } from "three/examples/jsm/postprocessing/shaderpass";
+// import { FilmShader } from "three/examples/jsm/shaders/FilmShader";
+import { MyShader } from "./MyShader";
 
 // メインのレンダラーの設定
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -25,20 +27,8 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass( scene, camera );
-composer.addPass(renderPass);
-
-const pass = new FilmPass();
-pass.uniforms.grayscale.value = 1;
-composer.addPass(pass);
-
-// const pass2 = new DotScreenPass();
-// composer.addPass(pass2);
-
 // レンダーターゲット
 const renderTarget = new THREE.WebGLRenderTarget(500, 500);
-
 
 const rtCamera = camera.clone();
 rtCamera.aspect = 1;
@@ -66,6 +56,13 @@ const mate = new THREE.ShaderMaterial({
 });
 const mesh = new THREE.Mesh(geo, mate);
 scene.add(mesh);
+
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const pass = new ShaderPass(MyShader);
+composer.addPass(pass);
 
 scene.background = new THREE.Color(0xeeeeee);
 

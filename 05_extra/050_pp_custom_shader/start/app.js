@@ -9,10 +9,9 @@ import vertexShader from "./vertex.glsl";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { FilmShader } from "three/examples/jsm/shaders/FilmShader";
-import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass"
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass"
-import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass"
-
+import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass";
+import { ShaderPass } from "three/examples/jsm/postprocessing/shaderpass";
+import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass";
 
 // メインのレンダラーの設定
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -28,10 +27,10 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass( scene, camera );
+const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
-const pass = new ShaderPass(FilmShader)
+const pass = new ShaderPass(FilmShader);
 // const pass = new FilmPass();
 pass.uniforms.grayscale.value = 1;
 composer.addPass(pass);
@@ -41,7 +40,6 @@ composer.addPass(pass);
 
 // レンダーターゲット
 const renderTarget = new THREE.WebGLRenderTarget(500, 500);
-
 
 const rtCamera = camera.clone();
 rtCamera.aspect = 1;
@@ -62,11 +60,11 @@ const rtMesh = new THREE.Mesh(rtGeo, rtMate);
 // const geo = new THREE.PlaneGeometry(20, 20);
 const geo = new THREE.BoxGeometry(4, 4, 4);
 const mate = new THREE.ShaderMaterial({
-  vertexShader,
-  fragmentShader,
-  uniforms: {
-    tDiffuse: { value: renderTarget.texture },
-  },
+  // vertexShader,
+  // fragmentShader,
+  // uniforms: {
+  //   tDiffuse: { value: renderTarget.texture },
+  // },
 });
 const mesh = new THREE.Mesh(geo, mate);
 scene.add(mesh);

@@ -3,60 +3,44 @@
  * https://threejs.org/
  */
 import * as THREE from "three";
-import { Mesh } from "three";
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { ShaderPass } from "three/examples/jsm/postprocessing/shaderpass";
+import vertexShader from "./vertex.glsl";
+import fragmentShader from "./fragment.glsl";
 
-//波紋クラス
 class Ripple {
   constructor(tex) {
     const ripple = { width: 100, height: 100 };
     this.geo = new THREE.PlaneGeometry(ripple.width, ripple.height);
     this.material = new THREE.MeshBasicMaterial({ transparent: 1, map: tex });
     this.mesh = new THREE.Mesh(this.geo, this.material);
-    //初期状態では不可視状態
     this.mesh.visible = false;
-    //使用中かどうかの状態変数
     this.isUsed = false;
   }
+
   start(mouse) {
-    const { mesh, material } = this;
+    const { material, mesh } = this;
 
-    //メッシュを可視状態にする
-    mesh.visible = true;
-    //使用中にする
     this.isUsed = true;
-
-    //メッシュをマウスに追従させる
+    mesh.visible = true;
     mesh.position.x = mouse.x;
     mesh.position.y = mouse.y;
-
-    //メッシュの大きさの変更
     mesh.scale.x = mesh.scale.y = 0.2;
-    //透明度の変更
     material.opacity = 0.8;
     mesh.rotation.z = 2 * Math.PI * Math.random();
-
     this.animate();
   }
 
   animate() {
     const { mesh, material } = this;
-
-    //メッシュの大きさを変更
     mesh.scale.y = mesh.scale.x = mesh.scale.x + 0.07;
-    //透明度を変更
     material.opacity *= 0.96;
-    //回転角度を変更
     mesh.rotation.z += 0.003;
 
-    //透明度が0.01以下になったら
     if (material.opacity <= 0.01) {
-      //波紋は不使用状態にする
+      // ループ終了
       this.isUsed = false;
-      //メッシュを不可視状態にする
       mesh.visible = false;
     } else {
-      //波紋のアニメーション
       requestAnimationFrame(() => {
         this.animate();
       });
@@ -64,7 +48,7 @@ class Ripple {
   }
 }
 
-(async () => {
+async function initRipplePass(composer) {
   const scene = new THREE.Scene();
 
   const camera = new THREE.OrthographicCamera(
@@ -72,64 +56,83 @@ class Ripple {
     window.innerWidth / 2,
     window.innerHeight / 2,
     -window.innerHeight / 2,
-    0.1,
-    1000
+    -window.innerHeight,
+    window.innerHeight
   );
 
-  camera.position.z = 500;
+  camera.position.z = 10;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  //レンダーターゲット
+  const renderer = new THREE.WebGLRenderTarget();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  document.body.appendChild(renderer.domElement);
-
-  const texLoader = new THREE.TextureLoader();
-  const tex = await texLoader.loadAsync(
-    "https://static.not-equal.dev/ja_webgl_basic/img/displacement/ripple.png"
-  );
-  const ripples = [];
   const rippleCount = 50;
-
-  //波紋オブジェクトを50個作成
+  const texLoader = new THREE.TextureLoader();
+  const tex = await texLoader.loadAsync("/img/displacement/ripple.png");
+  const ripples = [];
   for (let i = 0; i < rippleCount; i++) {
     const ripple = new Ripple(tex);
     scene.add(ripple.mesh);
     ripples.push(ripple);
   }
 
-  //マウスオブジェクト
+  //シェーダーマテリアル
+  const material = new THREE.ShaderMaterial({
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    uniforms: {
+      tDiffuse: { value: null },
+      texRipple: { value: renderer.texture },
+    },
+  });
+
+  //シェーダーパス
+  const pass = new ShaderPass(material); //シェーダーパスとして波紋エフェクトを追加
+  composer.addPass(pass);
+
   const mouse = {
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
     tick: 0,
   };
 
-  //mousemoveイベントを実行
-  renderer.domElement.addEventListener("mousemove", (event) => {
-    //マウス座標の正規化
+  function onMousemove(event) {
+    console.log(event.clientX, event.clientY);
     mouse.x = event.clientX - window.innerWidth / 2;
     mouse.y = -event.clientY + window.innerHeight / 2;
 
-    //毎5フレームごとに
     if (mouse.tick % 5 === 0) {
-      //rippleオブジェクトの配列からisUsedがfalse状態である最初のrippleオブジェクト（使用中でない）を_rippleに代入
       const _ripple = ripples.find((ripple) => !ripple.isUsed);
 
-      //使用できる要素が存在しない場合は処理を終了
       if (!_ripple) return;
 
-      //_rippleを可視状態にして、マウスに追従させ、使用中状態にする
       _ripple.start(mouse);
     }
-  });
+  }
 
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-
+  //アニメーション関数
+  function renderRipple(_renderer) {
+    //レンダーターゲットをセット
+    _renderer.setRenderTarget(renderer);
+    //レンダー描画
+    _renderer.render(scene, camera);
+    //レンダーターゲットをクリア
+    _renderer.setRenderTarget(null);
+    //毎フレームtickを増加
     mouse.tick++;
   }
 
-  animate();
-})();
+  //レンダーターゲットの描画状態を確認する関数
+  function getTexture() {
+    return renderer.texture;
+  }
+
+  return {
+    onMousemove,
+    renderRipple,
+    getTexture,
+  };
+}
+
+export default initRipplePass;
