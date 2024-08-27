@@ -14,9 +14,13 @@ import { DotScreenPass } from "three/examples/jsm/postprocessing/DotScreenPass.j
 
 // メインのレンダラーの設定
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+//レンダラーを画面サイズに設定
 renderer.setSize(window.innerWidth, window.innerHeight);
+//レンダーの背景色
 renderer.setClearColor(0xeeeeee);
+//レンダーをDOMに追加
 document.body.appendChild(renderer.domElement);
+//シーンとカメラを作成
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -25,6 +29,7 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
+// コンポーザーの設定
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);

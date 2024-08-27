@@ -67,10 +67,10 @@ async function initRipplePass(composer) {
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  const rippleCount = 50;
   const texLoader = new THREE.TextureLoader();
   const tex = await texLoader.loadAsync("/img/displacement/ripple.png");
   const ripples = [];
+  const rippleCount = 50;
   for (let i = 0; i < rippleCount; i++) {
     const ripple = new Ripple(tex);
     scene.add(ripple.mesh);

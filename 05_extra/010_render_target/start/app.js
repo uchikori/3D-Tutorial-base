@@ -55,7 +55,7 @@ rtCamera.updateProjectionMatrix();
 const rtGeo = new THREE.BoxGeometry(4, 4, 4);
 const rtMate = new THREE.MeshLambertMaterial({
   color: 0x009dff,
-  side: THREE.DoubleSide,
+  // side: THREE.DoubleSide,
 });
 const rtMesh = new THREE.Mesh(rtGeo, rtMate);
 //ライト1
